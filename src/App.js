@@ -1,24 +1,26 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginPage from './components/auth/LoginPage';
+import MatchesPage from './components/game/MatchesPage';
+import MatchPage from './components/game/MatchPage';
+import PrivateRoute from './utils/PrivateRoute';  
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Route pour la page de login */}
+          <Route path="/" element={<LoginPage />} />
+
+          {/* Route pour la page de liste des matchs */}
+          <PrivateRoute path="/matches" element={<MatchesPage />} /> {/* Protégé */}
+
+          {/* Route pour la page d'un match spécifique */}
+          <PrivateRoute path="/matches/:id" element={<MatchPage />} /> {/* Protégé */}
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

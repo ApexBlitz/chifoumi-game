@@ -1,10 +1,19 @@
 .App {
   text-align: center;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
 }
 
 .App-logo {
-  height: 40vmin;
+  height: 100px;
   pointer-events: none;
+  margin-bottom: 20px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -13,26 +22,109 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.match-section {
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.match-section h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.match-section p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+button {
+  font-size: 1.2rem;
+  padding: 12px 20px;
+  margin: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.1);
+  opacity: 0.8;
+}
+
+button.rock {
+  background-color: #f44336;
+  color: white;
+}
+
+button.paper {
+  background-color: #4caf50;
+  color: white;
+}
+
+button.scissors {
+  background-color: #2196f3;
+  color: white;
+}
+
+button:active {
+  transform: scale(1.05);
+}
+
+.message, .error {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.message {
+  color: #4caf50;
+}
+
+.error {
+  color: #f44336;
+}
+
+p.text-gray {
+  color: #888;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .match-section {
+    width: 90%;
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
   }
 }
