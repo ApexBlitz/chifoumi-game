@@ -16,27 +16,27 @@ const LoginPage = () => {
         password,
       });
 
-      // Stocker le token dans le stockage local
+      // Store token in localStorage
       localStorage.setItem('token', response.data.token);
 
-      // Rediriger vers la page des parties
+      // Redirect to the matches page
       window.location.href = '/matches';
     } catch (err) {
-      setError('Échec de la connexion. Veuillez vérifier vos identifiants.');
+      setError('Failed to login. Please check your credentials.');
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Connexion</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
 
         {error && <p className="mb-4 text-sm text-red-500">{error}</p>}
 
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Nom d'utilisateur
+              Username
             </label>
             <input
               type="text"
@@ -50,7 +50,7 @@ const LoginPage = () => {
 
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Mot de passe
+              Password
             </label>
             <input
               type="password"
@@ -66,7 +66,7 @@ const LoginPage = () => {
             type="submit"
             className="w-full px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
           >
-            Se connecter
+            Login
           </button>
         </form>
       </div>

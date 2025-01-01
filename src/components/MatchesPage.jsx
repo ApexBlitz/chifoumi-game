@@ -1,87 +1,103 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-const MatchesPage = () => {
-  const [matches, setMatches] = useState([]);
+const MatchPage = () => {
+  const { id } = useParams(); // Get match ID from URL params
+  const [match, setMatch] = useState(null);
+  const [playerMove, setPlayerMove] = useState('');
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchMatchData = async () => {
       try {
-        const response = await axios.get('http://fauques.freeboxos.fr:3000/matches', {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`/matches/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setMatches(response.data);
+        setMatch(response.data);
       } catch (err) {
-        setError('Erreur lors de la récupération des parties.');
-      } finally {
-        setLoading(false);
+        setError('Error loading match data.');
       }
     };
+    fetchMatchData();
+  }, [id]);
 
-    fetchMatches();
-  }, [token]);
-
-  const createMatch = async () => {
+  const handleMove = async (move) => {
+    setError('');
+    setMessage('');
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://fauques.freeboxos.fr:3000/matches',
-        {},
+        `/matches/${id}/turns/${match.turns.length + 1}`,
+        { move },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      setMatches((prevMatches) => [...prevMatches, response.data]);
+      setMessage('Move sent successfully!');
+      setPlayerMove(move);
+      setMatch(response.data); // Update match state after the move
     } catch (err) {
-      setError('Impossible de créer une nouvelle partie.');
+      setError('Error sending the move.');
     }
   };
 
-  if (loading) {
-    return <p>Chargement des parties...</p>;
-  }
+  const isMatchFinished = match && match.winner;
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Liste des Parties</h1>
-
+      <h1 className="text-2xl font-bold">Match: {id}</h1>
       {error && <p className="text-red-500">{error}</p>}
-
-      <button
-        onClick={createMatch}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Créer une Nouvelle Partie
-      </button>
-
-      {matches.length === 0 ? (
-        <p>Aucune partie disponible.</p>
+      {message && <p className="text-green-500">{message}</p>}
+      {match ? (
+        <>
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">Players</h2>
+            <p>Player 1: {match.user1.username}</p>
+            <p>Player 2: {match.user2?.username || 'Waiting for opponent'}</p>
+          </div>
+          {isMatchFinished ? (
+            <p className="text-xl font-bold text-green-500">
+              Match finished! Winner: {match.winner === 'draw' ? 'Draw' : match.winner}
+            </p>
+          ) : (
+            <>
+              <h2 className="text-lg font-semibold">Make your move:</h2>
+              <div className="flex gap-4 my-4">
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  onClick={() => handleMove('rock')}
+                >
+                  Rock
+                </button>
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                  onClick={() => handleMove('paper')}
+                >
+                  Paper
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                  onClick={() => handleMove('scissors')}
+                >
+                  Scissors
+                </button>
+              </div>
+              <p className="text-gray-600">Move played: {playerMove || 'None'}</p>
+            </>
+          )}
+        </>
       ) : (
-        <ul className="space-y-2">
-          {matches.map((match) => (
-            <li
-              key={match._id}
-              className="p-4 border rounded shadow hover:shadow-md"
-            >
-              <p>
-                <strong>Joueur 1 :</strong> {match.user1?.username || 'En attente'}
-              </p>
-              <p>
-                <strong>Joueur 2 :</strong> {match.user2?.username || 'En attente'}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <p>Loading match data...</p>
       )}
     </div>
   );
 };
 
-export default MatchesPage;
+export default MatchPage;
