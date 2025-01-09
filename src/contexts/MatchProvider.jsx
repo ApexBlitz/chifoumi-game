@@ -87,7 +87,7 @@ export default function MatchProvider({ children }) {
         createMatch,
         joinMatch,
         getMatchDetails,
-        getMatchById, // Ajout de la nouvelle fonction au contexte
+        getMatchById,
         playTurn,
       }}
     >

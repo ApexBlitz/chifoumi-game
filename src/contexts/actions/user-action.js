@@ -44,7 +44,8 @@ export async function loginUser(credentials) {
     return res.json();
   }).then((data) => {
     const { token } = data;
-    Cookies.set("JWT", token, { expires: 0.5, secure: true, sameSite: "strict" }); 
+    Cookies.set("JWT", token, { expires: 0.5, secure: true, sameSite: "strict" });
+    Cookies.set("username", credentials.username, { expires: 0.5, secure: true, sameSite: "strict" });
     return data;
   });
 }
