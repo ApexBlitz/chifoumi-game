@@ -1,10 +1,30 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
-import { useEffect, useState } from "react";
-
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "@/contexts/UserProvider";
+import Cookies from "js-cookie"; 
 
 export default function FrontLayout() {
+  const { loading } = useContext(UserContext);
+  const [username, setUsername] = useState(null);
+
+  useEffect(() => {
+    const token = Cookies.get("JWT");
+
+    if (token) {
+      const parsedToken = JSON.parse(atob(token.split(".")[1]));
+      setUsername(parsedToken.username);
+    } else {
+      setUsername(null);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    Cookies.remove("JWT");
+    setUsername(null);
+    window.location.reload();
+  };
 
   return (
     <>
@@ -22,11 +42,23 @@ export default function FrontLayout() {
         </div>
 
         <nav className="ml-auto flex items-center gap-6">
+          {loading ? (
+            <span>Chargement...</span>
+          ) : username ? (
+            <div className="flex items-center gap-4">
+              <span className="text-gray-600">Connecté en tant que : {username}</span>
+              <Button variant="link" onClick={handleLogout}>
+                Se déconnecter
+              </Button>
+              
+            </div>
+          ) : (
             <>
               <NavLink to="/auth/login">
                 <Button variant="secondary"><LogIn /></Button>
               </NavLink>
             </>
+          )}
         </nav>
       </header>
       <main>

@@ -1,0 +1,21 @@
+###
+POST http://fauques.freeboxos.fr:3000/register
+Content-Type: application/json
+
+{
+   "username": "monpseudo",
+   "password": "mypassword"
+}
+
+###
+POST http://fauques.freeboxos.fr:3000/login
+Content-Type: application/json
+
+{
+   "username": "monpseudo",
+   "password": "mypassword" 
+}
+
+### 
+GET http://fauques.freeboxos.fr:3000/matches
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiIyNGFlZTU2NC05OTM5LTRmZDctYTU2Yi01YTZhMTYwYTQ1MzIiLCJ1c2VybmFtZSI6InRlc3QxIiwiaWF0IjoxNzM0OTg2Mzc2LCJleHAiOjE3NjY1NDM5NzZ9.XuiPTxb0sZ5ovhT5qriuijSZLGZRj04F4o4DKap75RM
