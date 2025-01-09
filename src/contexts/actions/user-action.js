@@ -2,6 +2,15 @@ import Cookies from "js-cookie";
 
 const BASE_URL = "http://fauques.freeboxos.fr:3000";
 
+function generateToken(user) {
+  const payload = {
+    id: user.id,
+    username: user.username,
+  };
+
+  return jwt.sign(payload, SECRET_KEY, { expiresIn: '12h' });
+}
+
 export function addUser(newValues) {
   return fetch(`${BASE_URL}/register`, {
     method: "POST",
