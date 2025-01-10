@@ -9,7 +9,7 @@ export default function GameDesc({ match, username }) {
 
     if (!match) {
         console.error("Match prop is undefined in GameDesc");
-        return null; // Gracefully handle the missing match
+        return null;
     }
 
     return (
@@ -51,4 +51,5 @@ export default function GameDesc({ match, username }) {
         </Card>
     );
 }
+
 

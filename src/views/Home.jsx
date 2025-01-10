@@ -74,7 +74,7 @@ export default function Home() {
               {activeMatches.map((match) => {
                   if (!match || !match.user1) {
                       console.warn("Invalid match object detected:", match);
-                      return null; // Skip invalid match entries
+                      return null;
                   }
                   return <GameDesc key={match._id} match={match} username={username} />;
               })}
@@ -97,4 +97,5 @@ export default function Home() {
     </div>
   );
 }
+
 

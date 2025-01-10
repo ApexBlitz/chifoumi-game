@@ -45,11 +45,11 @@ export default function MatchProvider({ children }) {
   const getMatchById = async (matchId) => {
     setLoading(true);
     try {
-      const match = await MatchActions.getMatchById(matchId); // Appel de la fonction de l'action
-      return match; // Retourne les détails du match
+      const match = await MatchActions.getMatchById(matchId);
+      return match;
     } catch (error) {
       console.error('Error fetching match by ID:', error);
-      throw error; // Relance l'erreur pour une gestion ultérieure
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -82,5 +82,8 @@ export default function MatchProvider({ children }) {
     </MatchContext.Provider>
   );
 }
+
+
+
 
 

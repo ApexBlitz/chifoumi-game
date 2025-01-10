@@ -22,11 +22,10 @@ export default function FrontLayout() {
     }
   }, []);
 
-  // Définir handleLogout comme une fonction interne
   const handleLogout = () => {
     Cookies.remove("JWT");
     setUsername(null);
-    navigate("/auth/login"); // Redirection après déconnexion
+    navigate("/auth/login");
   };
 
   return (
@@ -90,3 +89,5 @@ function MountainIcon(props) {
     </svg>
   );
 }
+
+
