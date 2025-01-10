@@ -32,7 +32,6 @@ export default function Match() {
     return () => clearInterval(interval);
   }, [polling]);
 
-  // Effet pour gérer le numéro de tour actuel
   useEffect(() => {
     const newTurnNumber = calculateTurnNumber();
     if (newTurnNumber !== currentTurnNumber) {
@@ -125,17 +124,14 @@ export default function Match() {
   };
 
   const getCurrentPlayerChoice = () => {
-    // Si les deux joueurs ont joué, on prend le choix depuis l'historique
     if (bothPlayersPlayed(match)) {
       return isPlayer1 ? currentTurn?.user1 : currentTurn?.user2;
     }
     
-    // Si le joueur a fait un choix pour ce tour, on le montre
     if (playerChoice && !hasLockedForCurrentTurn) {
       return playerChoice;
     }
     
-    // Si le joueur a verrouillé son choix, on le montre depuis le match
     if (hasLockedForCurrentTurn) {
       return isPlayer1 ? currentTurn?.user1 : currentTurn?.user2;
     }
@@ -271,3 +267,4 @@ export default function Match() {
     </div>
   );
 }
+
