@@ -42,28 +42,25 @@ export const getMatchById = async (matchId) => {
 };
 
 export const createMatch = async () => {
-  const token = Cookies.get('JWT');
+  const token = Cookies.get("JWT");
   const response = await fetch(`${API_URL}/matches`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
-  return handleResponse(response);
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error("Erreur API createMatch :", error);
+    throw new Error(error.message || "Impossible de créer la partie.");
+  }
+
+  const data = await response.json();
+  return data;
 };
 
-export const joinMatch = async (matchId) => {
-  const token = Cookies.get('JWT');
-  const response = await fetch(`${API_URL}/matches/${matchId}/join`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-  return handleResponse(response);
-};
 
 export const getMatchDetails = async (matchId) => {
   const token = Cookies.get('JWT');
@@ -85,5 +82,16 @@ export const playTurn = async (matchId, turnId, move) => {
     },
     body: JSON.stringify({ move }),
   });
-  return handleResponse(response);
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    throw new Error(error?.message || 'Failed to play turn');
+  }
+
+  const contentType = response.headers.get("Content-Type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  } else {
+    return response.text(); 
+  }
 };

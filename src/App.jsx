@@ -12,6 +12,8 @@ import './App.css';
 
 import UserProvider from "@/contexts/UserProvider";
 import MatchProvider from '@/contexts/MatchProvider';
+import LoggedIn from './components/LoggedIn';
+import LoggedOut from './components/LoggedOut';
 
 function App() {
   return (
@@ -25,12 +27,27 @@ function App() {
 
             <Route path="/match" element={<FrontLayout />}>
               <Route index element={<Match />} />
-              <Route path=":matchId" element={<Match />} />
+              <Route path=":matchId" 
+                element={
+                  <LoggedIn>
+                    <Match />
+                  </LoggedIn>
+                } 
+                />
             </Route>
             
             <Route path="/auth" element={<AuthLayout />}>
-              <Route path="login" element={<Login />} />
-              <Route path="register" element={<Register />} />
+              <Route path="login" element={
+                <LoggedOut>
+                  <Login />
+                </LoggedOut>
+                } />
+
+              <Route path="register" element={
+                <LoggedOut>
+                  <Register />
+                </LoggedOut>
+                } />
             </Route>
           </Routes>
         </BrowserRouter>
@@ -40,6 +57,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

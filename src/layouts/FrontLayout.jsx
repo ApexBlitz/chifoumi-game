@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { UserContext } from "@/contexts/UserProvider";
-import Cookies from "js-cookie"; 
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 export default function FrontLayout() {
   const { loading } = useContext(UserContext);
   const [username, setUsername] = useState(null);
+  const navigate = useNavigate(); // Déplacer le hook ici
 
   useEffect(() => {
     const token = Cookies.get("JWT");
@@ -20,10 +22,11 @@ export default function FrontLayout() {
     }
   }, []);
 
+  // Définir handleLogout comme une fonction interne
   const handleLogout = () => {
     Cookies.remove("JWT");
     setUsername(null);
-    window.location.reload();
+    navigate("/auth/login"); // Redirection après déconnexion
   };
 
   return (
@@ -50,12 +53,13 @@ export default function FrontLayout() {
               <Button variant="link" onClick={handleLogout}>
                 Se déconnecter
               </Button>
-              
             </div>
           ) : (
             <>
               <NavLink to="/auth/login">
-                <Button variant="secondary"><LogIn /></Button>
+                <Button variant="secondary">
+                  <LogIn />
+                </Button>
               </NavLink>
             </>
           )}
@@ -86,9 +90,3 @@ function MountainIcon(props) {
     </svg>
   );
 }
-
-
-
-
-
-

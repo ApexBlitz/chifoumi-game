@@ -17,10 +17,11 @@ export default function Match() {
   const [loading, setLoading] = useState(true);
   const [playerChoice, setPlayerChoice] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
+  const [hasLockedForCurrentTurn, setHasLockedForCurrentTurn] = useState(false);
   const [error, setError] = useState(null);
   const [polling, setPolling] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [resetting, setResetting] = useState(false);
+  const [currentTurnNumber, setCurrentTurnNumber] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,6 +31,16 @@ export default function Match() {
     }, 1000);
     return () => clearInterval(interval);
   }, [polling]);
+
+  // Effet pour gérer le numéro de tour actuel
+  useEffect(() => {
+    const newTurnNumber = calculateTurnNumber();
+    if (newTurnNumber !== currentTurnNumber) {
+      setCurrentTurnNumber(newTurnNumber);
+      setHasLockedForCurrentTurn(false);
+      setPlayerChoice(null);
+    }
+  }, [match?.turns]);
 
   const fetchMatch = async () => {
     try {
@@ -42,7 +53,7 @@ export default function Match() {
           if (currentUsername === result.winner.username) {
             setShowConfetti(true);
           }
-        }        
+        }
       }
     } catch (err) {
       setError("Failed to load match details.");
@@ -59,7 +70,7 @@ export default function Match() {
   };
 
   const calculateTurnNumber = () => {
-    const turns = match.turns || [];
+    const turns = match?.turns || [];
     const lastTurn = turns[turns.length - 1] || {};
     const bothPlayed = lastTurn.user1 && lastTurn.user2;
 
@@ -71,47 +82,41 @@ export default function Match() {
   };
 
   const handleChoice = (choice) => {
-    if (!isLocked) {
+    if (!isLocked && !hasLockedForCurrentTurn) {
       setPlayerChoice(choice);
     }
   };
 
   const lockChoice = async () => {
+    if (hasLockedForCurrentTurn) return;
+    
     setIsLocked(true);
     const turnId = calculateTurnNumber();
-  
+
     try {
       setPolling(false);
       await playTurn(matchId, turnId, playerChoice);
+      setHasLockedForCurrentTurn(true);
       await fetchMatch();
     } catch (error) {
       console.error("Error playing turn:", error);
     } finally {
-      setPolling(true); 
+      setPolling(true);
       setIsLocked(false);
     }
-  };
-  
-
-  const resetForNextTurn = () => {
-    setTimeout(() => {
-      setPlayerChoice(null);
-      setResetting(false);
-    }, 3000);
-    setResetting(true);
   };
 
   if (loading) return <p>Loading match details...</p>;
   if (error) return <p>{error}</p>;
 
-  const isMatchReady = match.user1 && match.user2;
-  const isGameFinished = match.turns.length >= 3 && bothPlayersPlayed(match);
-  const currentTurn = match.turns[match.turns.length - 1];
+  const isMatchReady = match?.user1 && match?.user2;
+  const isGameFinished = match?.turns?.length >= 3 && bothPlayersPlayed(match);
+  const currentTurn = match?.turns[match?.turns.length - 1];
   const currentUsername = Cookies.get("username");
-  const isPlayer1 = currentUsername === match.user1.username;
+  const isPlayer1 = currentUsername === match?.user1?.username;
 
   const determinePointColor = (turn) => {
-    if (!turn) return "bg-gray-600";
+    if (!turn || !turn.winner) return "bg-gray-200";
     if (turn.winner === "draw") return "bg-yellow-500";
     if ((isPlayer1 && turn.winner === "user1") || (!isPlayer1 && turn.winner === "user2")) {
       return "bg-green-500";
@@ -119,33 +124,66 @@ export default function Match() {
     return "bg-red-500";
   };
 
+  const getCurrentPlayerChoice = () => {
+    // Si les deux joueurs ont joué, on prend le choix depuis l'historique
+    if (bothPlayersPlayed(match)) {
+      return isPlayer1 ? currentTurn?.user1 : currentTurn?.user2;
+    }
+    
+    // Si le joueur a fait un choix pour ce tour, on le montre
+    if (playerChoice && !hasLockedForCurrentTurn) {
+      return playerChoice;
+    }
+    
+    // Si le joueur a verrouillé son choix, on le montre depuis le match
+    if (hasLockedForCurrentTurn) {
+      return isPlayer1 ? currentTurn?.user1 : currentTurn?.user2;
+    }
+
+    return null;
+  };
+
+  const getOpponentChoice = () => {
+    if (bothPlayersPlayed(match)) {
+      return isPlayer1 ? currentTurn?.user2 : currentTurn?.user1;
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-600 flex flex-col items-center justify-center p-4">
       {showConfetti && <Confetti emojis={['🎉', '🎮', '✨']} recycle={false} />}
 
-      <h1 className="text-4xl font-bold text-white mb-8">{match.user1.username} vs {match.user2.username}</h1>
+      {match?.user2 ? (
+        <>
+          <h1 className="text-4xl font-bold text-white mb-8">
+            {match?.user1?.username || "Waiting"} vs {match?.user2?.username || "Waiting"}
+          </h1>
+          <div className="flex space-x-2 mb-6">
+            {[0, 1, 2].map((round) => (
+              <div
+                key={round}
+                className={`w-4 h-4 rounded-full ${
+                  determinePointColor(match?.turns[round])
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-yellow-500 text-lg mb-6">En attente d'un deuxième joueur ...</p>
+      )}
 
-      <div className="flex space-x-2 mb-6">
-        {[0, 1, 2].map((round) => (
-          <div
-            key={round}
-            className={`w-4 h-4 rounded-full ${
-              determinePointColor(match.turns[round])
-            }`}
-          />
-        ))}
-      </div>
-
-      {isMatchReady ? (
+      {isMatchReady && (
         <div className="flex flex-col items-center">
           <div className="flex justify-center space-x-8 mb-8">
             <GameCard
-              choice={currentTurn?.user1}
-              isRevealed={bothPlayersPlayed(match) && !resetting}
+              choice={getCurrentPlayerChoice()}
+              isRevealed={true}
             />
             <GameCard
-              choice={currentTurn?.user2}
-              isRevealed={bothPlayersPlayed(match) && !resetting}
+              choice={getOpponentChoice()}
+              isRevealed={bothPlayersPlayed(match)}
             />
           </div>
 
@@ -156,74 +194,79 @@ export default function Match() {
               className="text-2xl font-bold text-white mb-4"
             >
               {(() => {
-                const winner = currentTurn.winner;
+                const winner = currentTurn?.winner;
 
                 if (winner === "draw") return "It's a draw!";
                 if ((isPlayer1 && winner === "user1") || (!isPlayer1 && winner === "user2")) {
-                  return "You win!";
+                  return "Tu remporte le round !";
                 }
-                return "You lose!";
+                return "Tu perds le round !";
               })()}
             </motion.div>
           )}
 
           {!isGameFinished ? (
             <>
-             <div className="flex space-x-4 mb-4">
+              <div className="flex space-x-4 mb-4">
                 <Button
                   onClick={() => handleChoice("rock")}
-                  disabled={isLocked}
+                  disabled={isLocked || hasLockedForCurrentTurn}
                   className={`bg-red-500 hover:bg-red-600 ${
-                    isLocked ? "opacity-50 cursor-not-allowed" : ""
+                    (isLocked || hasLockedForCurrentTurn) ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  <Rock className="mr-2" /> Rock
-                </Button>
+                  <Rock className="mr-2" />Pierre</Button>
                 <Button
                   onClick={() => handleChoice("paper")}
-                  disabled={isLocked}
+                  disabled={isLocked || hasLockedForCurrentTurn}
                   className={`bg-blue-500 hover:bg-blue-600 ${
-                    isLocked ? "opacity-50 cursor-not-allowed" : ""
+                    (isLocked || hasLockedForCurrentTurn) ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  <Paper className="mr-2" /> Paper
+                  <Paper className="mr-2" /> Feuille
                 </Button>
                 <Button
                   onClick={() => handleChoice("scissors")}
-                  disabled={isLocked}
+                  disabled={isLocked || hasLockedForCurrentTurn}
                   className={`bg-green-500 hover:bg-green-600 ${
-                    isLocked ? "opacity-50 cursor-not-allowed" : ""
+                    (isLocked || hasLockedForCurrentTurn) ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                 >
-                  <Scissors className="mr-2" /> Scissors
+                  <Scissors className="mr-2" /> Ciseaux
                 </Button>
               </div>
               <Button
                 onClick={lockChoice}
-                disabled={!playerChoice || isLocked || resetting}
+                disabled={!playerChoice || isLocked || hasLockedForCurrentTurn}
                 className="mb-4"
               >
-                <Lock className="mr-2" /> Lock Choice
+                <Lock className="mr-2" /> Verouiller le choix
               </Button>
             </>
           ) : (
             <>
-              <h1 className="text-3xl text-red-500 font-bold mt-4">
-                {match.winner === "draw"
-                  ? "The match ended in a draw."
-                  : `${match.winner.username} wins the game!`}
-              </h1>
-              <Button
-                onClick={() => navigate("/")}
-                className="mt-4 bg-purple-500 hover:bg-purple-600"
+              <h1
+                className={`text-3xl font-bold mt-4 ${
+                  match?.winner?.username
+                    ? match.winner.username === currentUsername
+                      ? "text-green-500"
+                      : "text-red-500"
+                    : "text-white"
+                }`}
               >
-                Return to Home
-              </Button>
+                {match?.winner?.username
+                  ? match.winner.username === currentUsername
+                    ? "Vous remportez la partie !"
+                    : `${match.winner.username} remporte la partie !`
+                  : "Le match se termine sur une égalité."}
+              </h1>
+
+              <Button onClick={() => navigate("/")}
+                className="mt-4 bg-purple-500 hover:bg-purple-600"
+              >Retourner au menu</Button>
             </>
           )}
         </div>
-      ) : (
-        <p className="text-yellow-500 text-lg">Waiting for another player to join...</p>
       )}
     </div>
   );

@@ -31,18 +31,6 @@ export default function MatchProvider({ children }) {
     }
   };
 
-  const joinMatch = async (matchId) => {
-    setLoading(true);
-    try {
-      await MatchActions.joinMatch(matchId);
-      await fetchMatches();
-    } catch (error) {
-      console.error('Error joining match:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getMatchDetails = async (matchId) => {
     setLoading(true);
     try {
@@ -85,7 +73,6 @@ export default function MatchProvider({ children }) {
         loading,
         fetchMatches,
         createMatch,
-        joinMatch,
         getMatchDetails,
         getMatchById,
         playTurn,
@@ -95,3 +82,5 @@ export default function MatchProvider({ children }) {
     </MatchContext.Provider>
   );
 }
+
+
